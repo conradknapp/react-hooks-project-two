@@ -2,20 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 function App() {
-  const [data, setData] = useState({ hits: [] });
+  const [results, setResults] = useState([]);
   const [query, setQuery] = useState("react hooks");
-  const [url, setUrl] = useState(
-    "http://hn.algolia.com/api/v1/search?query=redux"
-  );
+  const [endpoint, setEndpoint] = useState("http://hn.algolia.com/api/v1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const searchEl = useRef(null);
+  const searchInput = useRef(null);
 
   useEffect(
     () => {
       getData();
     },
-    [url]
+    [endpoint]
   );
 
   const getData = async () => {
@@ -25,7 +23,7 @@ function App() {
       const { data } = await axios(
         `http://hn.algolia.com/api/v1/search?query=${query}`
       );
-      setData(data);
+      setResults(data.hits);
     } catch (err) {
       setError(err);
     }
@@ -35,13 +33,13 @@ function App() {
 
   const handleSubmit = event => {
     event.preventDefault();
-    setUrl(`http://hn.algolia.com/api/v1/search?query=${query}`);
+    setEndpoint(`http://hn.algolia.com/api/v1/search?query=${query}`);
   };
 
   const handleClearSearch = () => {
     setQuery("");
     // `current` points to the mounted text input element
-    searchEl.current.focus();
+    searchInput.current.focus();
   };
 
   return (
@@ -56,7 +54,7 @@ function App() {
         <input
           type="text"
           value={query}
-          ref={searchEl}
+          ref={searchInput}
           onChange={event => setQuery(event.target.value)}
           className="border p-1 rounded"
         />
@@ -73,16 +71,16 @@ function App() {
       </form>
 
       {loading ? (
-        <div className="font-bold text-orange-dark">Loading...</div>
+        <div className="font-bold text-orange-dark">Loading results...</div>
       ) : (
         <ul className="list-reset leading-normal">
-          {data.hits.map(item => (
-            <li key={item.objectID}>
+          {results.map(result => (
+            <li key={result.objectID}>
               <a
-                href={item.url}
+                href={result.url}
                 className="text-indigo-dark hover:text-indigo-darkest"
               >
-                {item.title}
+                {result.title}
               </a>
             </li>
           ))}
